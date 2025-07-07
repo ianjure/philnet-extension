@@ -1,0 +1,61 @@
+#phi-block-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.95);
+  z-index: 2147483647;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.phish-box {
+  background-color: #111;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 420px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.phish-box h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.phish-box p {
+  margin-bottom: 25px;
+  font-size: 18px;
+}
+
+.phish-box button {
+  margin: 0 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#phi-safe-btn {
+  background-color: #a33;
+  color: white;
+}
+
+#phi-safe-btn:hover {
+  background-color: #d55;
+}
+
+#phi-whitelist-btn {
+  background-color: #ffd700;
+  color: black;
+}
+
+#phi-whitelist-btn:hover {
+  background-color: #ffec3d;
+}
