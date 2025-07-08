@@ -4,6 +4,7 @@
   const hostname = new URL(targetUrl).hostname;
 
   const { enabled, whitelist = [] } = await chrome.storage.local.get(["enabled", "whitelist"]);
+
   const defaultTrustedDomains = [
     "google.com", "facebook.com", "youtube.com", "gmail.com", "amazon.com",
     "microsoft.com", "apple.com", "wikipedia.org", "twitter.com", "instagram.com"
@@ -17,10 +18,11 @@
     return;
   }
 
+  // Send phishing check request
   chrome.runtime.sendMessage({ action: "checkPhishing", url: targetUrl }, async (response) => {
     if (chrome.runtime.lastError) {
-      console.error("Phishing check failed:", chrome.runtime.lastError.message);
-      redirectToSafeUrl(targetUrl); // Fail open
+      console.error("[PhiLNet] Phishing check failed:", chrome.runtime.lastError.message);
+      redirectToSafeUrl(targetUrl);
       return;
     }
 
@@ -33,19 +35,21 @@
       redirectToSafeUrl(targetUrl);
     } else {
       await loadBlockOverlay(hostname, targetUrl);
+
       const { phishCount = 0 } = await chrome.storage.local.get("phishCount");
       await chrome.storage.local.set({ phishCount: phishCount + 1 });
     }
   });
 })();
 
-// Function to safely redirect to the original site with ?checked=1
+// ✅ Redirect to target URL with ?checked=1 to prevent re-blocking
 function redirectToSafeUrl(url) {
   const safeUrl = new URL(url);
   safeUrl.searchParams.set("checked", "1");
   window.location.replace(safeUrl.toString());
 }
 
+// ✅ Load external HTML block overlay and bind buttons
 async function loadBlockOverlay(hostname, targetUrl) {
   try {
     const res = await fetch(chrome.runtime.getURL("block_content.html"));
@@ -65,7 +69,7 @@ async function loadBlockOverlay(hostname, targetUrl) {
       redirectToSafeUrl(targetUrl);
     };
   } catch (err) {
-    console.error("Error loading block page:", err);
+    console.error("[PhiLNet] Error loading block page:", err);
     redirectToSafeUrl(targetUrl);
   }
 }
