@@ -1,8 +1,10 @@
 (async () => {
-  const currentUrl = window.location.href;
-  if (currentUrl.includes("block.html")) return; // Don't redirect block page
+  const url = new URL(window.location.href);
+  if (url.searchParams.get("checked") === "1") return; // Already checked, do not re-check
 
-  const hostname = new URL(currentUrl).hostname;
+  if (url.href.includes("block.html")) return; // Don't redirect block page
+
+  const hostname = url.hostname;
   const { enabled, whitelist = [] } = await chrome.storage.local.get(["enabled", "whitelist"]);
 
   const defaultTrustedDomains = [
@@ -13,9 +15,9 @@
   const isWhitelisted = whitelist.some(d => hostname.includes(d)) ||
                         defaultTrustedDomains.some(d => hostname.includes(d));
 
-  if (!enabled || isWhitelisted) return; // Allow site if disabled or whitelisted
+  if (!enabled || isWhitelisted) return;
 
-  // Redirect to block.html for phishing check
-  const redirectUrl = chrome.runtime.getURL(`block.html?url=${encodeURIComponent(currentUrl)}`);
+  // Redirect to block.html
+  const redirectUrl = chrome.runtime.getURL(`block.html?url=${encodeURIComponent(url.href)}`);
   window.location.replace(redirectUrl);
 })();
