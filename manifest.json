@@ -10,7 +10,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["block.html", "block.css"],
+      "resources": ["block.html", "block.css", "block_content.html", "block_content.css"],
       "matches": ["<all_urls>"]
     }
   ],
