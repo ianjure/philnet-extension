@@ -1,48 +1,58 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  const toggle = document.getElementById("toggle");
-  const countEl = document.getElementById("count");
-  const whitelistInput = document.getElementById("whitelist-url");
-  const whitelistList = document.getElementById("whitelist");
+  const enabledToggle = document.getElementById("enabledToggle");
+  const phishCountSpan = document.getElementById("phishCount");
+  const whitelistUl = document.getElementById("whitelist");
+  const historyUl = document.getElementById("history");
+  const addDomainInput = document.getElementById("addDomain");
+  const addWhitelistBtn = document.getElementById("addWhitelist");
 
-  // Load settings from storage
-  const storage = await chrome.storage.local.get(["enabled", "phishCount", "whitelist"]);
-  toggle.checked = storage.enabled ?? true;
-  countEl.textContent = storage.phishCount ?? 0;
+  async function loadData() {
+    const { enabled, whitelist = [], phishCount = 0, detectionHistory = [] } = await chrome.storage.local.get(["enabled", "whitelist", "phishCount", "detectionHistory"]);
 
-  let whitelist = storage.whitelist || [];
+    enabledToggle.checked = enabled;
+    phishCountSpan.textContent = phishCount;
 
-  // Helper to refresh the whitelist UI
-  function renderWhitelist() {
-    whitelistList.innerHTML = "";
+    whitelistUl.innerHTML = "";
     whitelist.forEach(domain => {
       const li = document.createElement("li");
-      li.textContent = domain + " ";
-      const btn = document.createElement("button");
-      btn.textContent = "Remove";
-      btn.style.marginLeft = "5px";
-      btn.onclick = async () => {
-        whitelist = whitelist.filter(d => d !== domain);
-        await chrome.storage.local.set({ whitelist });
-        renderWhitelist();
+      li.textContent = domain;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "Remove";
+      removeBtn.style.marginLeft = "5px";
+      removeBtn.onclick = async () => {
+        const newWhitelist = whitelist.filter(d => d !== domain);
+        await chrome.storage.local.set({ whitelist: newWhitelist });
+        loadData();
       };
-      li.appendChild(btn);
-      whitelistList.appendChild(li);
+
+      li.appendChild(removeBtn);
+      whitelistUl.appendChild(li);
+    });
+
+    historyUl.innerHTML = "";
+    detectionHistory.slice().reverse().forEach(entry => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${entry.url}</span><br><span class="small">${entry.time}</span>`;
+      historyUl.appendChild(li);
     });
   }
 
-  renderWhitelist();
-
-  toggle.addEventListener("change", () => {
-    chrome.storage.local.set({ enabled: toggle.checked });
+  enabledToggle.addEventListener("change", async () => {
+    await chrome.storage.local.set({ enabled: enabledToggle.checked });
   });
 
-  document.getElementById("add-whitelist").onclick = async () => {
-    const domain = whitelistInput.value.trim();
-    if (domain && !whitelist.includes(domain)) {
-      whitelist.push(domain);
+  addWhitelistBtn.addEventListener("click", async () => {
+    const newDomain = addDomainInput.value.trim();
+    if (!newDomain) return;
+    const { whitelist = [] } = await chrome.storage.local.get("whitelist");
+    if (!whitelist.includes(newDomain)) {
+      whitelist.push(newDomain);
       await chrome.storage.local.set({ whitelist });
-      renderWhitelist();
-      whitelistInput.value = "";
+      addDomainInput.value = "";
+      loadData();
     }
-  };
+  });
+
+  loadData();
 });
