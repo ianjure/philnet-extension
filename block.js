@@ -13,18 +13,24 @@
                         defaultTrustedDomains.some(d => hostname.includes(d));
 
   if (!enabled || isWhitelisted) {
-    window.location.replace(targetUrl);
+    redirectToSafeUrl(targetUrl);
     return;
   }
 
   chrome.runtime.sendMessage({ action: "checkPhishing", url: targetUrl }, async (response) => {
+    if (chrome.runtime.lastError) {
+      console.error("Phishing check failed:", chrome.runtime.lastError.message);
+      redirectToSafeUrl(targetUrl); // Fail open
+      return;
+    }
+
     const { detectionHistory = [] } = await chrome.storage.local.get("detectionHistory");
     const timestamp = new Date().toLocaleString();
     detectionHistory.push({ url: targetUrl, time: timestamp });
     await chrome.storage.local.set({ detectionHistory });
 
     if (!response || !response.isPhishing) {
-      window.location.replace(targetUrl);
+      redirectToSafeUrl(targetUrl);
     } else {
       await loadBlockOverlay(hostname, targetUrl);
       const { phishCount = 0 } = await chrome.storage.local.get("phishCount");
@@ -33,29 +39,33 @@
   });
 })();
 
+// Function to safely redirect to the original site with ?checked=1
+function redirectToSafeUrl(url) {
+  const safeUrl = new URL(url);
+  safeUrl.searchParams.set("checked", "1");
+  window.location.replace(safeUrl.toString());
+}
+
 async function loadBlockOverlay(hostname, targetUrl) {
   try {
     const res = await fetch(chrome.runtime.getURL("block_content.html"));
     const html = await res.text();
     document.body.innerHTML = html;
 
-    // Inject hostname
     document.getElementById("phi-hostname").textContent = hostname;
 
-    // Safe button
     document.getElementById("phi-safe-btn").onclick = () => window.close();
 
-    // Whitelist button
     document.getElementById("phi-whitelist-btn").onclick = async () => {
       const { whitelist = [] } = await chrome.storage.local.get("whitelist");
       if (!whitelist.includes(hostname)) {
         whitelist.push(hostname);
         await chrome.storage.local.set({ whitelist });
       }
-      window.location.replace(targetUrl);
+      redirectToSafeUrl(targetUrl);
     };
   } catch (err) {
     console.error("Error loading block page:", err);
-    window.location.replace(targetUrl);
+    redirectToSafeUrl(targetUrl);
   }
 }
