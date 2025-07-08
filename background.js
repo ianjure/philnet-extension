@@ -4,7 +4,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.action === "checkPhishing") {
-    const isPhish = await checkPhishingAPI(request.url);
+    const isPhish = await checkPhishing(request.url);
     sendResponse({ isPhishing: isPhish });
   }
 
@@ -15,7 +15,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   return true;
 });
 
-async function checkPhishingAPI(url) {
+async function checkPhishing(url) {
   try {
     const response = await fetch("http://philnet-api.onrender.com/predict", {
       method: "POST",
