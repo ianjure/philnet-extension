@@ -23,7 +23,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Wrapper to handle phishing check
 async function handleCheckPhishing(url, sendResponse) {
 	try {
-		const isPhishing = await callPhishingAPI(url);
+		const isPhishing = await callPhishingAPI(url, "Extension");
 		sendResponse({ isPhishing });
 	} catch (error) {
 		console.error("[PhiLNet] Error checking phishing:", error);
@@ -32,14 +32,14 @@ async function handleCheckPhishing(url, sendResponse) {
 }
 
 // Actual phishing API call
-async function callPhishingAPI(url) {
+async function callPhishingAPI(url, source) {
 	const apiURL = "http://philnet-api.onrender.com/predict";
 
 	try {
 		const response = await fetch(apiURL, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ url }),
+			body: JSON.stringify({ url, source }),
 			cache: "no-store",
 		});
 
