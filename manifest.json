@@ -11,6 +11,7 @@
 	"web_accessible_resources": [
 		{
 			"resources": [
+				"whitelist.txt",
 				"block.html",
 				"block.css",
 				"block_content.html",

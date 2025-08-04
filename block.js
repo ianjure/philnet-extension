@@ -3,23 +3,19 @@
 	const targetUrl = params.get("url");
 	const hostname = new URL(targetUrl).hostname;
 
+	// Fetch whitelist.txt from extension files
+	const res = await fetch(chrome.runtime.getURL("whitelist.txt"));
+	const text = await res.text();
+	const defaultTrustedDomains = text
+		.split("\n")
+		.map((line) => line.trim().toLowerCase())
+		.filter(Boolean); // remove empty lines
+
+	// Load user settings from storage
 	const { enabled, whitelist = [] } = await chrome.storage.local.get([
 		"enabled",
 		"whitelist",
 	]);
-
-	const defaultTrustedDomains = [
-		"google.com",
-		"facebook.com",
-		"youtube.com",
-		"gmail.com",
-		"amazon.com",
-		"microsoft.com",
-		"apple.com",
-		"wikipedia.org",
-		"twitter.com",
-		"instagram.com",
-	];
 
 	const isWhitelisted =
 		whitelist.some((d) => hostname.includes(d)) ||
