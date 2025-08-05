@@ -1,33 +1,21 @@
 (async () => {
 	const url = new URL(window.location.href);
-	if (url.searchParams.get("checked") === "1") return; // Already checked, do not re-check
 
-	if (url.href.includes("block.html")) return; // Don't redirect block page
+	// Skip if already checked or if it's the block page itself
+	if (url.searchParams.get("checked") === "1") return;
+	if (url.href.includes("block.html")) return;
 
 	const hostname = url.hostname;
-	const { enabled, whitelist = [] } = await chrome.storage.local.get([
-		"enabled",
-		"whitelist",
-	]);
+	const { enabled } = await chrome.storage.local.get("enabled");
 
-	const defaultTrustedDomains = [
-		"google.com",
-		"facebook.com",
-		"youtube.com",
-		"gmail.com",
-		"amazon.com",
-		"microsoft.com",
-		"apple.com",
-		"wikipedia.org",
-		"x.com",
-		"instagram.com",
-	];
-
-	const isWhitelisted =
-		whitelist.some((d) => hostname.includes(d)) ||
-		defaultTrustedDomains.some((d) => hostname.includes(d));
-
-	if (!enabled || isWhitelisted) return;
+	// Skip if extension is disabled, whitelisted, or recently verified safe
+	if (
+		!enabled ||
+		(await isWhitelisted(hostname)) ||
+		(await isInLegitCache(hostname))
+	) {
+		return;
+	}
 
 	// Redirect to block.html
 	const redirectUrl = chrome.runtime.getURL(

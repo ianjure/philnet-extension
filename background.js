@@ -5,6 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
 		whitelist: [],
 		phishCount: 0,
 		detectionHistory: [],
+		legitCache: {},
 	});
 });
 

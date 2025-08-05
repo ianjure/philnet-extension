@@ -3,30 +3,19 @@
 	const targetUrl = params.get("url");
 	const hostname = new URL(targetUrl).hostname;
 
-	// Fetch whitelist.txt from extension files
-	const res = await fetch(chrome.runtime.getURL("whitelist.txt"));
-	const text = await res.text();
-	const defaultTrustedDomains = text
-		.split("\n")
-		.map((line) => line.trim().toLowerCase())
-		.filter(Boolean); // remove empty lines
+	const { enabled } = await chrome.storage.local.get("enabled");
 
-	// Load user settings from storage
-	const { enabled, whitelist = [] } = await chrome.storage.local.get([
-		"enabled",
-		"whitelist",
-	]);
-
-	const isWhitelisted =
-		whitelist.some((d) => hostname.includes(d)) ||
-		defaultTrustedDomains.some((d) => hostname.includes(d));
-
-	if (!enabled || isWhitelisted) {
+	// Skip inference if extension is disabled, whitelisted, or cached as legitimate
+	if (
+		!enabled ||
+		(await isWhitelisted(hostname)) ||
+		(await isInLegitCache(hostname))
+	) {
 		redirectToSafeUrl(targetUrl);
 		return;
 	}
 
-	// Send phishing check request
+	// Perform phishing check via background
 	chrome.runtime.sendMessage(
 		{ action: "checkPhishing", url: targetUrl },
 		async (response) => {
@@ -39,6 +28,7 @@
 				return;
 			}
 
+			// Record detection attempt
 			const { detectionHistory = [] } = await chrome.storage.local.get(
 				"detectionHistory"
 			);
@@ -46,11 +36,13 @@
 			detectionHistory.push({ url: targetUrl, time: timestamp });
 			await chrome.storage.local.set({ detectionHistory });
 
+			// If safe, update cache and redirect
 			if (!response || !response.isPhishing) {
+				await updateLegitCache(hostname);
 				redirectToSafeUrl(targetUrl);
 			} else {
+				// If phishing, block and increment count
 				await loadBlockOverlay(hostname, targetUrl);
-
 				const { phishCount = 0 } = await chrome.storage.local.get(
 					"phishCount"
 				);
@@ -60,14 +52,14 @@
 	);
 })();
 
-// ✅ Redirect to target URL with ?checked=1 to prevent re-blocking
+// Redirect to target URL with ?checked=1 to prevent re-blocking
 function redirectToSafeUrl(url) {
 	const safeUrl = new URL(url);
 	safeUrl.searchParams.set("checked", "1");
 	window.location.replace(safeUrl.toString());
 }
 
-// ✅ Load external HTML block overlay and bind buttons
+// Load external HTML block overlay and bind buttons
 async function loadBlockOverlay(hostname, targetUrl) {
 	try {
 		const res = await fetch(chrome.runtime.getURL("block_content.html"));

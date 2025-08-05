@@ -2,7 +2,7 @@
 	"manifest_version": 3,
 	"name": "PhiLNet Vanguard",
 	"version": "1.2",
-	"description": "Detect and block phishing websites",
+	"description": "Detect and block phishing websites in real-time.",
 	"permissions": ["storage", "tabs"],
 	"host_permissions": ["<all_urls>"],
 	"background": {
@@ -15,7 +15,9 @@
 				"block.html",
 				"block.css",
 				"block_content.html",
-				"block_content.css"
+				"block_content.css",
+				"block.js",
+				"utils.js"
 			],
 			"matches": ["<all_urls>"]
 		}
@@ -23,7 +25,7 @@
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
-			"js": ["redirector.js"],
+			"js": ["utils.js", "redirector.js"],
 			"run_at": "document_start"
 		}
 	],
