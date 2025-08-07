@@ -4,10 +4,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const statusText = document.querySelector(".status-text");
 
 	const phishCountSpan = document.getElementById("phishCount");
+
 	const whitelistUl = document.getElementById("whitelist");
 	const historyUl = document.getElementById("history");
 	const addDomainInput = document.getElementById("addDomain");
 	const addWhitelistBtn = document.getElementById("addWhitelist");
+
+	// Function to update the status indicator when the switch toggle is clicked
+	function updateStatusIndicator(isProtected) {
+		statusIcon.textContent = isProtected ? "🔒" : "🔓";
+		statusText.textContent = isProtected ? "Protected" : "Unprotected";
+	}
 
 	async function loadData() {
 		const {
@@ -25,11 +32,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Load Switch Toggle State
 		switchToggle.checked = enabled;
 		updateStatusIndicator(enabled);
-		function updateStatusIndicator(isProtected) {
-			statusIcon.textContent = isProtected ? "🔒" : "🔓";
-			statusText.textContent = isProtected ? "Protected" : "Unprotected";
-		}
 
+		// Load Phish Count
 		phishCountSpan.textContent = phishCount;
 
 		whitelistUl.innerHTML = "";
@@ -62,8 +66,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	// Switch Toggle Listener
-	switchToggle.addEventListener("change", async () => {
-		await chrome.storage.local.set({ enabled: switchToggle.checked });
+	switchToggle.addEventListener("change", () => {
+		const isProtected = switchToggle.checked;
+		chrome.storage.local.set({ enabled: isProtected });
+		updateStatusIndicator(isProtected);
+		loadData();
 	});
 
 	addWhitelistBtn.addEventListener("click", async () => {
