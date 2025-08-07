@@ -22,9 +22,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 			"detectionHistory",
 		]);
 
+		// Load Switch Toggle State
 		switchToggle.checked = enabled;
 		updateStatusIndicator(enabled);
-
 		function updateStatusIndicator(isProtected) {
 			statusIcon.textContent = isProtected ? "🔒" : "🔓";
 			statusText.textContent = isProtected ? "Protected" : "Unprotected";
@@ -61,8 +61,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 			});
 	}
 
-	enabledToggle.addEventListener("change", async () => {
-		await chrome.storage.local.set({ enabled: enabledToggle.checked });
+	// Switch Toggle Listener
+	switchToggle.addEventListener("change", async () => {
+		await chrome.storage.local.set({ enabled: switchToggle.checked });
 	});
 
 	addWhitelistBtn.addEventListener("click", async () => {
