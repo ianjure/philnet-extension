@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", async () => {
-	const enabledToggle = document.getElementById("enabledToggle");
+	const switchToggle = document.getElementById("switchToggle");
+	const statusIcon = document.querySelector(".status-icon");
+	const statusText = document.querySelector(".status-text");
+
 	const phishCountSpan = document.getElementById("phishCount");
 	const whitelistUl = document.getElementById("whitelist");
 	const historyUl = document.getElementById("history");
@@ -19,7 +22,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 			"detectionHistory",
 		]);
 
-		enabledToggle.checked = enabled;
+		switchToggle.checked = enabled;
+		updateStatusIndicator(enabled);
+
+		function updateStatusIndicator(isProtected) {
+			statusIcon.textContent = isProtected ? "🔒" : "🔓";
+			statusText.textContent = isProtected ? "Protected" : "Unprotected";
+		}
+
 		phishCountSpan.textContent = phishCount;
 
 		whitelistUl.innerHTML = "";
