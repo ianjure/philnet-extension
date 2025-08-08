@@ -33,7 +33,7 @@
 				"detectionHistory"
 			);
 			const timestamp = new Date().toLocaleString();
-			detectionHistory.push({ url: targetUrl, time: timestamp });
+			detectionHistory.push({ time: timestamp, url: targetUrl, score: response.score });
 			await chrome.storage.local.set({ detectionHistory });
 
 			// If safe, update cache and redirect

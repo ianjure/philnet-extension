@@ -21,6 +21,29 @@ body {
 	align-items: center;
 	width: 100%;
 	color: white;
+	position: relative;
+}
+
+/* History Button */
+.icon-button {
+	width: 36px;
+	height: 36px;
+	border: none;
+	border-radius: 50%;
+	background-color: rgba(255, 255, 255, 0.1);
+	color: white;
+	font-size: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+.icon-button:hover {
+	background-color: rgba(255, 255, 255, 0.2);
+}
+.icon-button i {
+	pointer-events: none;
 }
 
 /* Toggle Switch */
@@ -66,11 +89,15 @@ input:checked + .slider:before {
 
 /* Status Indicator */
 .status-indicator {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
 	display: flex;
 	align-items: center;
-	gap: 6px;
 	font-weight: bold;
 	font-size: 14px;
+	color: white;
+	white-space: nowrap; /* prevent wrapping */
 }
 
 /* Stat Box */
@@ -104,4 +131,137 @@ input:checked + .slider:before {
 	font-weight: normal;
 	color: #f5ffca;
 	margin-top: 8px;
+}
+
+/* Whitelist section */
+.whitelist-section {
+	margin-top: 0;
+}
+.whitelist-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: white;
+	font-size: 16px;
+	font-weight: bold;
+	margin-top: 20px;
+}
+.whitelist-input-group {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+#addDomain {
+	background-color: transparent;
+	border: 1px solid gray;
+	border-radius: 2px;
+	padding: 4px 8px;
+	color: white;
+	outline: none;
+}
+#addDomain::placeholder {
+	color: gray;
+}
+#addWhitelist {
+	background-color: #3a3a3a;
+	color: white;
+	border: none;
+	border-radius: 2px;
+	padding: 4px 10px;
+	cursor: pointer;
+	font-size: 16px;
+}
+#addWhitelist:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+.whitelist-divider {
+	border: none;
+	height: 2px;
+	background-color: gray;
+	margin-top: 8px;
+}
+#whitelist {
+	list-style: none;
+	padding: 0;
+	margin: 10px 0 0 0;
+}
+
+/* Whitelist items */
+.whitelist-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: white;
+	padding: 5px 0;
+}
+.domain-name {
+	flex-grow: 1;
+	font-size: 14px;
+}
+.remove-btn {
+	background: none;
+	border: none;
+	color: red;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 0 6px;
+}
+.whitelist-separator {
+	border: none;
+	border-bottom: 1px solid gray;
+	margin: 0;
+}
+
+/* Logo */
+.logo {
+	position: absolute;
+	bottom: 40px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 84px;
+}
+
+/* History Section */
+.hidden {
+	display: none !important;
+}
+.history-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	color: white;
+	position: relative;
+}
+.history-title {
+	color: white;
+	font-weight: bold;
+}
+.icon-button {
+	background: none;
+	border: none;
+	color: white;
+	font-size: 16px;
+	cursor: pointer;
+}
+.history-table {
+	max-height: 400px;
+	overflow-y: auto;
+	padding: 8px 0;
+}
+.history-row {
+	display: flex;
+	justify-content: space-between;
+	padding: 10px 16px;
+	border-bottom: 1px solid #2e2e2e;
+	color: gray;
+	font-size: 14px;
+	word-break: break-word;
+}
+.history-row.phishing .website {
+	text-decoration: line-through;
+}
+.history-row.phishing .score {
+	color: #c8f119;
 }

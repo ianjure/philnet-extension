@@ -1,24 +1,97 @@
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
 	const switchToggle = document.getElementById("switchToggle");
 	const statusIcon = document.querySelector(".status-icon");
 	const statusText = document.querySelector(".status-text");
 
 	const phishCountSpan = document.getElementById("phishCount");
 
-	const whitelistUl = document.getElementById("whitelist");
-	const historyUl = document.getElementById("history");
-	const addDomainInput = document.getElementById("addDomain");
-	const addWhitelistBtn = document.getElementById("addWhitelist");
+	const addBtn = document.getElementById("addWhitelist");
+	const input = document.getElementById("addDomain");
+	const whitelistContainer = document.getElementById("whitelist");
 
-	// Function to update the status indicator when the switch toggle is clicked
+	document.getElementById("historyBtn").addEventListener("click", () => {
+		document.getElementById("main-section").classList.add("hidden");
+		document.getElementById("history-section").classList.remove("hidden");
+	});
+
+	document.getElementById("back-button").addEventListener("click", () => {
+		document.getElementById("history-section").classList.add("hidden");
+		document.getElementById("main-section").classList.remove("hidden");
+	});
+
+	let currentWhitelist = [];
+
 	function updateStatusIndicator(isProtected) {
-		statusIcon.textContent = isProtected ? "🔒" : "🔓";
+		//statusIcon.textContent = isProtected ? "🔒" : "🔓";
 		statusText.textContent = isProtected ? "Protected" : "Unprotected";
+	}
+
+	function renderHistory(history) {
+		const table = document.getElementById("history-table");
+		table.innerHTML = "";
+
+		// Sort by time (descending)
+		const sortedHistory = [...history].sort((a, b) => b.time - a.time);
+
+		sortedHistory.forEach((entry) => {
+			const row = document.createElement("div");
+			row.className = `history-row${entry.score >= 0.5 ? " phishing" : ""}`;
+
+			const website = document.createElement("div");
+			website.className = "website";
+			website.textContent = entry.url;
+
+			const score = document.createElement("div");
+			score.className = "score";
+			score.textContent = (entry.score * 100).toFixed(1) + "%";
+
+			row.appendChild(website);
+			row.appendChild(score);
+			table.appendChild(row);
+		});
+	}
+
+
+	function renderWhitelist() {
+		whitelistContainer.innerHTML = "";
+
+		currentWhitelist.forEach((site, index) => {
+			const li = document.createElement("li");
+			li.className = "whitelist-item";
+
+			const domainText = document.createElement("span");
+			domainText.textContent = site;
+			domainText.className = "domain-name";
+
+			const removeBtn = document.createElement("button");
+			removeBtn.textContent = "✕";
+			removeBtn.className = "remove-btn";
+			removeBtn.addEventListener("click", async () => {
+				currentWhitelist.splice(index, 1);
+				await chrome.storage.local.set({ whitelist: currentWhitelist });
+				renderWhitelist();
+				updateAddButtonState();
+			});
+
+			li.appendChild(domainText);
+			li.appendChild(removeBtn);
+			whitelistContainer.appendChild(li);
+
+			const separator = document.createElement("hr");
+			separator.className = "whitelist-separator";
+			whitelistContainer.appendChild(separator);
+		});
+	}
+
+	function updateAddButtonState() {
+		const domain = input.value.trim();
+		const isDuplicate = currentWhitelist.includes(domain);
+		addBtn.disabled = domain === "" || isDuplicate || currentWhitelist.length >= 5;
 	}
 
 	async function loadData() {
 		const {
-			enabled,
+			enabled = false,
 			whitelist = [],
 			phishCount = 0,
 			detectionHistory = [],
@@ -29,61 +102,43 @@ document.addEventListener("DOMContentLoaded", async () => {
 			"detectionHistory",
 		]);
 
-		// Load Switch Toggle State
 		switchToggle.checked = enabled;
 		updateStatusIndicator(enabled);
 
-		// Load Phish Count
 		phishCountSpan.textContent = phishCount;
 
-		whitelistUl.innerHTML = "";
-		whitelist.forEach((domain) => {
-			const li = document.createElement("li");
-			li.textContent = domain;
+		currentWhitelist = whitelist;
+		renderWhitelist();
+		updateAddButtonState();
 
-			const removeBtn = document.createElement("button");
-			removeBtn.textContent = "Remove";
-			removeBtn.style.marginLeft = "5px";
-			removeBtn.onclick = async () => {
-				const newWhitelist = whitelist.filter((d) => d !== domain);
-				await chrome.storage.local.set({ whitelist: newWhitelist });
-				loadData();
-			};
-
-			li.appendChild(removeBtn);
-			whitelistUl.appendChild(li);
-		});
-
-		historyUl.innerHTML = "";
-		detectionHistory
-			.slice()
-			.reverse()
-			.forEach((entry) => {
-				const li = document.createElement("li");
-				li.innerHTML = `<span>${entry.url}</span><br><span class="small">${entry.time}</span>`;
-				historyUl.appendChild(li);
-			});
+		renderHistory(detectionHistory);
 	}
 
-	// Switch Toggle Listener
-	switchToggle.addEventListener("change", () => {
+	// Switch toggle
+	switchToggle.addEventListener("change", async () => {
 		const isProtected = switchToggle.checked;
-		chrome.storage.local.set({ enabled: isProtected });
+		await chrome.storage.local.set({ enabled: isProtected });
 		updateStatusIndicator(isProtected);
-		loadData();
 	});
 
-	addWhitelistBtn.addEventListener("click", async () => {
-		const newDomain = addDomainInput.value.trim();
-		if (!newDomain) return;
-		const { whitelist = [] } = await chrome.storage.local.get("whitelist");
-		if (!whitelist.includes(newDomain)) {
-			whitelist.push(newDomain);
-			await chrome.storage.local.set({ whitelist });
-			addDomainInput.value = "";
-			loadData();
+	// Add domain to whitelist
+	addBtn.addEventListener("click", async () => {
+		const domain = input.value.trim();
+		if (
+			domain &&
+			!currentWhitelist.includes(domain) &&
+			currentWhitelist.length < 5
+		) {
+			currentWhitelist.push(domain);
+			await chrome.storage.local.set({ whitelist: currentWhitelist });
+			input.value = "";
+			renderWhitelist();
+			updateAddButtonState();
 		}
 	});
+
+	// Input change listener for validation
+	input.addEventListener("input", updateAddButtonState);
 
 	loadData();
 });

@@ -4,39 +4,68 @@
 		<meta charset="UTF-8" />
 		<title>PhiLNet Vanguard</title>
 		<link rel="stylesheet" href="popup.css" />
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+		/>
 	</head>
 	<body style="width: 345px">
-		<div class="top-bar">
-			<button id="historyBtn">History</button>
+		<!-- Main Section -->
+		<div id="main-section">
+			<div class="top-bar">
+				<button id="historyBtn" class="icon-button" title="View History">
+					<i class="fas fa-history"></i>
+				</button>
 
-			<div class="status-indicator" id="statusIndicator">
-				<span class="status-icon">🔓</span>
-				<span class="status-text">Unprotected</span>
+				<div class="status-indicator" id="statusIndicator">
+					<span class="status-icon"></span>
+					<span class="status-text">Unprotected</span>
+				</div>
+
+				<label class="switch">
+					<input type="checkbox" id="switchToggle" />
+					<span class="slider round"></span>
+				</label>
 			</div>
 
-			<label class="switch">
-				<input type="checkbox" id="switchToggle" />
-				<span class="slider round"></span>
-			</label>
-		</div>
-
-		<div class="stat-box">
-			<div class="stat-content">
-				<div class="phish-count" id="phishCount">0</div>
-				<div class="stat-label">Total Attempts Blocked</div>
+			<div class="stat-box">
+				<div class="stat-content">
+					<div class="phish-count" id="phishCount">0</div>
+					<div class="stat-label">Total Attempts Blocked</div>
+				</div>
 			</div>
+
+			<div class="whitelist-section">
+				<div class="whitelist-header">
+					<strong>Whitelist</strong>
+					<div class="whitelist-input-group">
+						<input
+							type="text"
+							id="addDomain"
+							placeholder="example.com"
+						/>
+						<button id="addWhitelist" disabled>+</button>
+					</div>
+				</div>
+				<hr class="whitelist-divider" />
+				<ul id="whitelist"></ul>
+			</div>
+
+			<img src="logo.svg" alt="Logo" class="logo" />
 		</div>
 
-		<div class="section">
-			<strong>Whitelist:</strong>
-			<ul id="whitelist"></ul>
-			<input type="text" id="addDomain" placeholder="example.com" />
-			<button id="addWhitelist">Add to Whitelist</button>
-		</div>
+		<!-- History Section -->
+		<div id="history-section" class="hidden">
+			<div class="history-header">
+				<button id="back-button" class="icon-button" title="Back">
+					<i class="fa fa-arrow-left"></i>
+				</button>
 
-		<div class="section">
-			<strong>Detection History:</strong>
-			<ul id="history"></ul>
+				<div class="status-indicator">
+					<span class="history-title">History</span>
+				</div>
+			</div>
+			<div id="history-table" class="history-table"></div>
 		</div>
 
 		<script src="popup.js"></script>

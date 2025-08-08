@@ -24,11 +24,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Wrapper to handle phishing check
 async function handleCheckPhishing(url, sendResponse) {
 	try {
-		const isPhishing = await callPhishingAPI(url, "Extension");
-		sendResponse({ isPhishing });
+		const { prediction, score } = await callPhishingAPI(url, "Extension");
+		sendResponse({
+			score,
+			isPhishing: prediction === "phishing"
+		});
 	} catch (error) {
 		console.error("[PhiLNet] Error checking phishing:", error);
-		sendResponse({ isPhishing: false }); // Fail open if API fails
+		sendResponse({
+			score: null,
+			isPhishing: false
+		});
 	}
 }
 
@@ -52,7 +58,10 @@ async function callPhishingAPI(url, source) {
 		}
 
 		const data = await response.json();
-		return data.prediction === "phishing";
+		return {
+			prediction: data.prediction,
+			score: data.score
+		};
 	} catch (err) {
 		console.error("[PhiLNet] API request failed:", err);
 		return false;
