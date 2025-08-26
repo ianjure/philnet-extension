@@ -45,7 +45,7 @@
 
 				addHistory({
 					time: timestamp,
-					url: `${rootDomain}${parsedUrl.pathname}`,
+					url: rootDomain,
 					score: -1, // mark failed checks with -1
 				});
 				await chrome.storage.local.set({ detectionHistory });
@@ -56,7 +56,7 @@
 
 			addHistory({
 				time: timestamp,
-				url: `${rootDomain}${parsedUrl.pathname}`,
+				url: rootDomain,
 				score: response?.score ?? -1,
 			});
 			await chrome.storage.local.set({ detectionHistory });
