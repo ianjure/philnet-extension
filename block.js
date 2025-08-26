@@ -21,7 +21,7 @@
 		async (response) => {
 			const timestamp = new Date().toLocaleString();
 			const parsedUrl = new URL(targetUrl);
-			const rootDomain = getRootDomain(parsedUrl.hostname);
+			const fullDomain = parsedUrl.hostname;
 
 			// Load history
 			const { detectionHistory = [] } = await chrome.storage.local.get(
@@ -45,7 +45,7 @@
 
 				addHistory({
 					time: timestamp,
-					url: rootDomain,
+					url: fullDomain.toLowerCase(),
 					score: -1, // mark failed checks with -1
 				});
 				await chrome.storage.local.set({ detectionHistory });
@@ -56,7 +56,7 @@
 
 			addHistory({
 				time: timestamp,
-				url: rootDomain,
+				url: fullDomain.toLowerCase(),
 				score: response?.score ?? -1,
 			});
 			await chrome.storage.local.set({ detectionHistory });
@@ -129,8 +129,12 @@ async function loadBlockOverlay(hostname, targetUrl) {
 				"whitelist"
 			);
 
-			if (!whitelist.includes(rootDomain)) {
-				whitelist.push(rootDomain);
+			if (
+				!whitelist.some(
+					(d) => d.toLowerCase() === rootDomain.toLowerCase()
+				)
+			) {
+				whitelist.push(rootDomain.toLowerCase());
 				await chrome.storage.local.set({ whitelist });
 			}
 			redirectToSafeUrl(targetUrl);
