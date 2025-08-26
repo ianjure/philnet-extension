@@ -1,4 +1,5 @@
-const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+// 24 hours in milliseconds
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 // Load trusted domains from whitelist.txt bundled in the extension
 async function loadDefaultTrustedDomains() {
@@ -14,11 +15,14 @@ async function loadDefaultTrustedDomains() {
 async function isWhitelisted(hostname) {
 	const { whitelist = [] } = await chrome.storage.local.get("whitelist");
 	const defaultTrustedDomains = await loadDefaultTrustedDomains();
-
-	return (
-		whitelist.some((d) => hostname.includes(d)) ||
-		defaultTrustedDomains.some((d) => hostname.includes(d))
+	const all = [...whitelist, ...defaultTrustedDomains].map((d) =>
+		d.toLowerCase()
 	);
+
+	const host = hostname.toLowerCase();
+
+	// Exact domain match OR subdomain match
+	return all.some((domain) => host === domain || host.endsWith(`.${domain}`));
 }
 
 // Check if a hostname is in the legitimate cache and not expired
@@ -28,8 +32,8 @@ async function isInLegitCache(hostname) {
 
 	let changed = false;
 	for (const domain in legitCache) {
-		if (now - legitCache[domain] >= ONE_WEEK_MS) {
-			delete legitCache[domain];
+		if (now - legitCache[domain] >= ONE_DAY_MS) {
+			delete legitCache[domain]; // expired
 			changed = true;
 		}
 	}
@@ -44,6 +48,17 @@ async function isInLegitCache(hostname) {
 // Add or update a hostname in the legit cache with the current timestamp
 async function updateLegitCache(hostname) {
 	const { legitCache = {} } = await chrome.storage.local.get("legitCache");
-	legitCache[hostname] = Date.now();
+	const now = Date.now();
+
+	// Clean out expired entries first
+	for (const domain in legitCache) {
+		if (now - legitCache[domain] >= ONE_DAY_MS) {
+			delete legitCache[domain];
+		}
+	}
+
+	// Update current hostname
+	legitCache[hostname] = now;
+
 	await chrome.storage.local.set({ legitCache });
 }

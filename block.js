@@ -5,7 +5,7 @@
 
 	const { enabled } = await chrome.storage.local.get("enabled");
 
-	// Skip inference if extension is disabled, whitelisted, or cached as legitimate
+	// Skip if extension is disabled, site is whitelisted, or cached safe
 	if (
 		!enabled ||
 		(await isWhitelisted(hostname)) ||
@@ -19,21 +19,46 @@
 	chrome.runtime.sendMessage(
 		{ action: "checkPhishing", url: targetUrl },
 		async (response) => {
+			const timestamp = new Date().toLocaleString();
+			const parsedUrl = new URL(targetUrl);
+			const rootDomain = getRootDomain(parsedUrl.hostname);
+
+			// Load history
+			const { detectionHistory = [] } = await chrome.storage.local.get(
+				"detectionHistory"
+			);
+
+			// Helper to safely push with a cap
+			function addHistory(entry) {
+				detectionHistory.push(entry);
+				// Keep only the last 10 entries
+				if (detectionHistory.length > 10) {
+					detectionHistory.splice(0, detectionHistory.length - 10);
+				}
+			}
+
 			if (chrome.runtime.lastError) {
 				console.error(
 					"[PhiLNet] Phishing check failed:",
 					chrome.runtime.lastError.message
 				);
+
+				addHistory({
+					time: timestamp,
+					url: `${rootDomain}${parsedUrl.pathname}`,
+					score: -1, // mark failed checks with -1
+				});
+				await chrome.storage.local.set({ detectionHistory });
+
 				redirectToSafeUrl(targetUrl);
 				return;
 			}
 
-			// Record detection attempt
-			const { detectionHistory = [] } = await chrome.storage.local.get(
-				"detectionHistory"
-			);
-			const timestamp = new Date().toLocaleString();
-			detectionHistory.push({ time: timestamp, url: targetUrl, score: response.score });
+			addHistory({
+				time: timestamp,
+				url: `${rootDomain}${parsedUrl.pathname}`,
+				score: response?.score ?? -1,
+			});
 			await chrome.storage.local.set({ detectionHistory });
 
 			// If safe, update cache and redirect
@@ -51,6 +76,15 @@
 		}
 	);
 })();
+
+// Extract the root domain (e.g., google.com from mail.google.com)
+function getRootDomain(hostname) {
+	const parts = hostname.split(".");
+	if (parts.length <= 2) {
+		return hostname; // already a root domain
+	}
+	return parts.slice(-2).join("."); // take last two labels
+}
 
 // Redirect to target URL with ?checked=1 to prevent re-blocking
 function redirectToSafeUrl(url) {
@@ -71,11 +105,13 @@ async function loadBlockOverlay(hostname, targetUrl) {
 		document.getElementById("phi-safe-btn").onclick = () => window.close();
 
 		document.getElementById("phi-whitelist-btn").onclick = async () => {
+			const rootDomain = getRootDomain(hostname);
 			const { whitelist = [] } = await chrome.storage.local.get(
 				"whitelist"
 			);
-			if (!whitelist.includes(hostname)) {
-				whitelist.push(hostname);
+
+			if (!whitelist.includes(rootDomain)) {
+				whitelist.push(rootDomain);
 				await chrome.storage.local.set({ whitelist });
 			}
 			redirectToSafeUrl(targetUrl);

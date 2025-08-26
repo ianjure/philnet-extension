@@ -8,7 +8,7 @@
 	const hostname = url.hostname;
 	const { enabled } = await chrome.storage.local.get("enabled");
 
-	// Skip if extension is disabled, whitelisted, or recently verified safe
+	// Skip if extension is disabled, site is whitelisted, or cached safe
 	if (
 		!enabled ||
 		(await isWhitelisted(hostname)) ||
@@ -17,7 +17,7 @@
 		return;
 	}
 
-	// Redirect to block.html
+	// Otherwise, let block.js handle the phishing check
 	const redirectUrl = chrome.runtime.getURL(
 		`block.html?url=${encodeURIComponent(url.href)}`
 	);
