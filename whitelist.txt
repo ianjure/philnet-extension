@@ -302,6 +302,7 @@ ecosia.org
 edgecdn.ru
 edgekey.net
 edgesuite.net
+edu.ph
 elasticbeanstalk.com
 elmundo.es
 elpais.com
@@ -617,6 +618,7 @@ nmrodam.com
 no-ip.com
 noaa.gov
 notamedia.ru
+npmjs.com
 npr.org
 nr-data.net
 nstld.com
@@ -713,6 +715,7 @@ redfin.com
 redhat.com
 reg.ru
 registrar-servers.com
+render.com
 repubblica.it
 researchgate.net
 reuters.com
@@ -811,6 +814,7 @@ stickyadstv.com
 stripchat.com
 stripe.com
 substack.com
+supabase.com
 surfshark.com
 surveymonkey.com
 svc.ms
