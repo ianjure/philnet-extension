@@ -77,13 +77,32 @@
 	);
 })();
 
-// Extract the root domain (e.g., google.com from mail.google.com)
+// Extract the root domain
 function getRootDomain(hostname) {
 	const parts = hostname.split(".");
-	if (parts.length <= 2) {
-		return hostname; // already a root domain
+
+	// Handle known 2-level TLDs (ccTLDs like edu.ph, gov.ph, co.uk, etc.)
+	const twoLevelTLDs = [
+		"edu.ph",
+		"gov.ph",
+		"com.ph",
+		"net.ph",
+		"org.ph",
+		"co.uk",
+	];
+	const lastTwo = parts.slice(-2).join(".");
+	const lastThree = parts.slice(-3).join(".");
+
+	if (twoLevelTLDs.includes(lastTwo)) {
+		return lastThree; // e.g., ustp.edu.ph
 	}
-	return parts.slice(-2).join("."); // take last two labels
+
+	// Default: take last two parts
+	if (parts.length >= 2) {
+		return lastTwo; // e.g., google.com, supabase.io
+	}
+
+	return hostname;
 }
 
 // Redirect to target URL with ?checked=1 to prevent re-blocking
