@@ -27,13 +27,13 @@ async function handleCheckPhishing(url, sendResponse) {
 		const { prediction, score } = await callPhishingAPI(url, "Extension");
 		sendResponse({
 			score,
-			isPhishing: prediction === "phishing"
+			isPhishing: prediction === "phishing",
 		});
 	} catch (error) {
 		console.error("[PhiLNet] Error checking phishing:", error);
 		sendResponse({
 			score: null,
-			isPhishing: false
+			isPhishing: false,
 		});
 	}
 }
@@ -58,9 +58,10 @@ async function callPhishingAPI(url, source) {
 		}
 
 		const data = await response.json();
+		console.log(data);
 		return {
 			prediction: data.prediction,
-			score: data.score
+			score: data.score,
 		};
 	} catch (err) {
 		console.error("[PhiLNet] API request failed:", err);
