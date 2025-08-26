@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
 	const switchToggle = document.getElementById("switchToggle");
-	const statusIcon = document.querySelector(".status-icon");
-	const statusText = document.querySelector(".status-text");
 
 	const phishCountSpan = document.getElementById("phishCount");
 
@@ -9,23 +7,22 @@ document.addEventListener("DOMContentLoaded", () => {
 	const input = document.getElementById("addDomain");
 	const whitelistContainer = document.getElementById("whitelist");
 
+	// History button listener
 	document.getElementById("historyBtn").addEventListener("click", () => {
 		document.getElementById("main-section").classList.add("hidden");
 		document.getElementById("history-section").classList.remove("hidden");
 	});
 
+	// Back button in history section listener
 	document.getElementById("back-button").addEventListener("click", () => {
 		document.getElementById("history-section").classList.add("hidden");
 		document.getElementById("main-section").classList.remove("hidden");
 	});
 
+	// Current whitelist state
 	let currentWhitelist = [];
 
-	function updateStatusIndicator(isProtected) {
-		//statusIcon.textContent = isProtected ? "🔒" : "🔓";
-		statusText.textContent = isProtected ? "Protected" : "Unprotected";
-	}
-
+	// Function to render detection history
 	function renderHistory(history) {
 		const table = document.getElementById("history-table");
 		table.innerHTML = "";
@@ -35,7 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		sortedHistory.forEach((entry) => {
 			const row = document.createElement("div");
-			row.className = `history-row${entry.score >= 0.5 ? " phishing" : ""}`;
+			row.className = `history-row${
+				entry.score >= 0.5 ? " phishing" : ""
+			}`;
 
 			const website = document.createElement("div");
 			website.className = "website";
@@ -51,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	}
 
-
+	// Function to render whitelist
 	function renderWhitelist() {
 		whitelistContainer.innerHTML = "";
 
@@ -83,12 +82,15 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	}
 
+	// Function to update add whitelist button state
 	function updateAddButtonState() {
 		const domain = input.value.trim();
 		const isDuplicate = currentWhitelist.includes(domain);
-		addBtn.disabled = domain === "" || isDuplicate || currentWhitelist.length >= 5;
+		addBtn.disabled =
+			domain === "" || isDuplicate || currentWhitelist.length >= 5;
 	}
 
+	// Load initial data
 	async function loadData() {
 		const {
 			enabled = false,
@@ -103,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		]);
 
 		switchToggle.checked = enabled;
-		updateStatusIndicator(enabled);
 
 		phishCountSpan.textContent = phishCount;
 
@@ -114,11 +115,10 @@ document.addEventListener("DOMContentLoaded", () => {
 		renderHistory(detectionHistory);
 	}
 
-	// Switch toggle
+	// Switch toggle listener
 	switchToggle.addEventListener("change", async () => {
 		const isProtected = switchToggle.checked;
 		await chrome.storage.local.set({ enabled: isProtected });
-		updateStatusIndicator(isProtected);
 	});
 
 	// Add domain to whitelist

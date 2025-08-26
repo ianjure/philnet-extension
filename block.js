@@ -21,7 +21,7 @@
 		async (response) => {
 			const timestamp = new Date().toLocaleString();
 			const parsedUrl = new URL(targetUrl);
-			const fullDomain = parsedUrl.hostname;
+			const fullDomain = parsedUrl.hostname.replace(/^www\./, "");
 
 			// Load history
 			const { detectionHistory = [] } = await chrome.storage.local.get(
