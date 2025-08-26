@@ -260,7 +260,7 @@ input:checked + .slider:before {
 	word-break: break-word;
 }
 .history-row.phishing .website {
-	text-decoration: line-through;
+	color: whitesmoke;
 }
 .history-row.phishing .score {
 	color: #c8f119;
