@@ -21,7 +21,9 @@
 		async (response) => {
 			const timestamp = new Date().toLocaleString();
 			const parsedUrl = new URL(targetUrl);
-			const fullDomain = parsedUrl.hostname.replace(/^www\./, "");
+			const fullDomain = parsedUrl.hostname
+				.replace(/^www\./, "")
+				.toLowerCase();
 
 			// Load history
 			const { detectionHistory = [] } = await chrome.storage.local.get(
@@ -45,7 +47,7 @@
 
 				addHistory({
 					time: timestamp,
-					url: fullDomain.toLowerCase(),
+					url: fullDomain,
 					score: -1, // mark failed checks with -1
 				});
 				await chrome.storage.local.set({ detectionHistory });
@@ -56,7 +58,7 @@
 
 			addHistory({
 				time: timestamp,
-				url: fullDomain.toLowerCase(),
+				url: fullDomain,
 				score: response?.score ?? -1,
 			});
 			await chrome.storage.local.set({ detectionHistory });
@@ -76,71 +78,3 @@
 		}
 	);
 })();
-
-// Extract the root domain
-function getRootDomain(hostname) {
-	const parts = hostname.split(".");
-
-	// Handle known 2-level TLDs (ccTLDs like edu.ph, gov.ph, co.uk, etc.)
-	const twoLevelTLDs = [
-		"edu.ph",
-		"gov.ph",
-		"com.ph",
-		"net.ph",
-		"org.ph",
-		"co.uk",
-	];
-	const lastTwo = parts.slice(-2).join(".");
-	const lastThree = parts.slice(-3).join(".");
-
-	if (twoLevelTLDs.includes(lastTwo)) {
-		return lastThree; // e.g., ustp.edu.ph
-	}
-
-	// Default: take last two parts
-	if (parts.length >= 2) {
-		return lastTwo; // e.g., google.com, supabase.io
-	}
-
-	return hostname;
-}
-
-// Redirect to target URL with ?checked=1 to prevent re-blocking
-function redirectToSafeUrl(url) {
-	const safeUrl = new URL(url);
-	safeUrl.searchParams.set("checked", "1");
-	window.location.replace(safeUrl.toString());
-}
-
-// Load external HTML block overlay and bind buttons
-async function loadBlockOverlay(hostname, targetUrl) {
-	try {
-		const res = await fetch(chrome.runtime.getURL("block_content.html"));
-		const html = await res.text();
-		document.body.innerHTML = html;
-
-		document.getElementById("phi-hostname").textContent = hostname;
-
-		document.getElementById("phi-safe-btn").onclick = () => window.close();
-
-		document.getElementById("phi-whitelist-btn").onclick = async () => {
-			const rootDomain = getRootDomain(hostname);
-			const { whitelist = [] } = await chrome.storage.local.get(
-				"whitelist"
-			);
-
-			if (
-				!whitelist.some(
-					(d) => d.toLowerCase() === rootDomain.toLowerCase()
-				)
-			) {
-				whitelist.push(rootDomain.toLowerCase());
-				await chrome.storage.local.set({ whitelist });
-			}
-			redirectToSafeUrl(targetUrl);
-		};
-	} catch (err) {
-		console.error("[PhiLNet] Error loading block page:", err);
-		redirectToSafeUrl(targetUrl);
-	}
-}

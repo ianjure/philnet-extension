@@ -1,11 +1,26 @@
-<link rel="stylesheet" href="block_content.css" />
-
-<div class="phish-box">
-	<h2>⚠️ Phishing Site Detected</h2>
-	<p>
-		The website <strong id="phi-hostname"></strong> has been flagged as
-		potentially dangerous.
-	</p>
-	<button id="phi-safe-btn">Close Tab</button>
-	<button id="phi-whitelist-btn">Add to Whitelist & Continue</button>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Site Block - PhiLNet</title>
+		<link rel="stylesheet" href="block_content.css" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body>
+		<div class="block-container">
+			<img src="logo.svg" alt="Logo" class="logo" />
+			<h2>⚠️ Phishing Site Detected!</h2>
+			<p>
+				The website <strong id="hostname"></strong> has been flagged as
+				potentially dangerous.
+			</p>
+			<div class="button-group">
+				<button id="close-btn">Go back to safety</button>
+				<button id="continue-btn">Continue anyway</button>
+			</div>
+		</div>
+	</body>
+</html>

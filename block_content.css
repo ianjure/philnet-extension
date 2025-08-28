@@ -1,58 +1,68 @@
 body {
 	margin: 0;
 	padding: 0;
-	font-family: Arial, sans-serif;
-	background-color: #f8f8f8;
-	color: #333;
+	font-family: "Inter", sans-serif;
+	background-color: #1b1b1b;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	height: 100vh;
 }
 
-.phish-box {
-	background-color: white;
-	border: 2px solid #e53935;
-	border-radius: 12px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	padding: 30px;
-	max-width: 400px;
+.block-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background: none;
+}
+
+.logo {
+	display: block;
+	margin: -100px auto 50px auto;
+	width: 150px;
+	height: auto;
+}
+
+h2 {
+	font-size: 50px;
+	color: white;
+	margin-bottom: 0px;
 	text-align: center;
 }
 
-.phish-box h2 {
-	color: #d32f2f;
-	margin-bottom: 15px;
+p {
+	font-size: 20px;
+	color: white;
+	margin-bottom: 100px;
+	text-align: center;
 }
 
-.phish-box p {
-	margin-bottom: 20px;
+.button-group {
+	display: flex;
+	gap: 30px;
+	justify-content: center;
 }
 
-.phish-box button {
-	margin: 5px;
+button {
+	width: 200px;
+	margin: 0;
 	padding: 10px 20px;
 	font-size: 14px;
-	border: none;
-	border-radius: 6px;
+	border: 1px solid white;
+	border-radius: 100px;
 	cursor: pointer;
-	transition: background-color 0.2s;
 }
-
-#phi-safe-btn {
-	background-color: #e53935;
+#close-btn {
+	background-color: #333;
 	color: white;
 }
-
-#phi-safe-btn:hover {
-	background-color: #c62828;
+#close-btn:hover {
+	background-color: #525252;
 }
-
-#phi-whitelist-btn {
-	background-color: #4caf50;
-	color: white;
+#continue-btn {
+	background-color: white;
+	color: black;
 }
-
-#phi-whitelist-btn:hover {
-	background-color: #388e3c;
+#continue-btn:hover {
+	background-color: #b9b9b9;
 }
