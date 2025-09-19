@@ -40,7 +40,7 @@ async function handleCheckPhishing(url, sendResponse) {
 
 // Actual phishing API call
 async function callPhishingAPI(url, source) {
-	const apiURL = "http://philnet-backend.onrender.com/predict";
+	const apiURL = "https://ianjure-philnet-backend.sliplane.app/predict";
 
 	try {
 		const response = await fetch(apiURL, {
