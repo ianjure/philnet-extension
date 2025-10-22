@@ -40,7 +40,7 @@
 			}
 
 			if (chrome.runtime.lastError) {
-				console.error(
+				console.log(
 					"[PhiLNet] Phishing check failed:",
 					chrome.runtime.lastError.message
 				);
