@@ -30,6 +30,7 @@ async function handleCheckPhishing(url, sendResponse) {
 			isPhishing: prediction === "phishing",
 		});
 	} catch (error) {
+		console.log("[PhiLNet] Error checking phishing:", error);
 		sendResponse({
 			score: null,
 			isPhishing: false,
@@ -50,16 +51,17 @@ async function callPhishingAPI(url, source) {
 		});
 
 		if (!response.ok) {
+			console.log(`[PhiLNet] API responded with status: ${response.status}`);
 			return false;
 		}
 
 		const data = await response.json();
-		console.log(data);
 		return {
 			prediction: data.prediction,
 			score: data.score,
 		};
 	} catch (err) {
+		console.log("[PhiLNet] API request failed:", err);
 		return false;
 	}
 }
