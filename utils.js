@@ -116,7 +116,7 @@ async function loadBlockOverlay(hostname, targetUrl) {
 			redirectToSafeUrl(targetUrl);
 		};
 	} catch (err) {
-		console.error("[PhiLNet] Error loading block page:", err);
+		console.log("[PhiLNet Vanguard] Error loading block page:", err);
 		redirectToSafeUrl(targetUrl);
 	}
 }
