@@ -2,8 +2,8 @@
 	"manifest_version": 3,
 	"name": "PhiLNet Vanguard",
 	"version": "1.2",
-	"description": "Detect and block phishing websites in real-time.",
-	"permissions": ["storage", "tabs"],
+	"description": "Detect phishing websites in real-time via secure backend API.",
+	"permissions": ["storage", "tabs", "scripting"],
 	"host_permissions": ["<all_urls>"],
 	"background": {
 		"service_worker": "background.js"
